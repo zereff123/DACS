@@ -2,7 +2,6 @@
 <a href="index.php?controller=question&action=create">➕ Thêm câu hỏi</a>
 <table border="1" cellpadding="5">
     <tr>
-        <th>ID</th>
         <th>Nội dung</th>
         <th>Đáp án A</th>
         <th>Đáp án B</th>
@@ -16,7 +15,6 @@
     </tr>
     <?php foreach ($questions as $q): ?>
     <tr>
-        <td><?= $q['QuestionId'] ?></td>
         <td><?= htmlspecialchars($q['Content']) ?></td>
         <td><?= htmlspecialchars($q['OptionA']) ?></td>
         <td><?= htmlspecialchars($q['OptionB']) ?></td>

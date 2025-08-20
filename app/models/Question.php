@@ -32,11 +32,10 @@ class Question {
     }
 
     public function getById($id) {
-        $sql = "SELECT q.*, s.SubjectName 
-                FROM Questions q
-                JOIN Subjects s ON q.SubjectId = s.SubjectId
-                WHERE q.QuestionId = ?";
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->prepare("SELECT q.*, s.SubjectName 
+                                    FROM Questions q
+                                    JOIN Subjects s ON q.SubjectId = s.SubjectId
+                                    WHERE q.QuestionId = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -64,7 +63,7 @@ class Question {
         return $stmt->execute([$id]);
     }
 
-    // 👉 Lấy ngẫu nhiên N câu hỏi (mặc định 40)
+    // Lấy ngẫu nhiên N câu hỏi
     public function getRandom($limit = 40) {
         $stmt = $this->db->prepare("SELECT q.*, s.SubjectName 
                                     FROM Questions q
@@ -75,7 +74,7 @@ class Question {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 👉 Lấy ngẫu nhiên N câu hỏi theo môn học
+    // Lấy ngẫu nhiên N câu hỏi theo môn học
     public function getRandomBySubject($subjectId, $limit = 40) {
         $stmt = $this->db->prepare("SELECT q.*, s.SubjectName 
                                     FROM Questions q
@@ -88,30 +87,31 @@ class Question {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 👉 Lấy ngẫu nhiên N câu hỏi theo môn, lớp, học lực (user)
+    // Lấy ngẫu nhiên N câu hỏi theo môn, lớp, trình độ học sinh
     public function getRandomBySubjectGradePerformance($subjectId, $gradeLevel, $currentLevel, $limit = 40) {
-        // Map CurrentLevel (user) -> DifficultyLevel (câu hỏi)
+        // Map CurrentLevel -> DifficultyLevel
         $map = [
             'Yếu' => 'Dễ',
+            'TB'  => 'TB',
             'Khá' => 'TB',
             'Giỏi' => 'Khó'
         ];
         $difficulty = $map[$currentLevel] ?? 'TB';
 
-        $sql = "SELECT q.*, s.SubjectName 
-                FROM Questions q
-                JOIN Subjects s ON q.SubjectId = s.SubjectId
-                WHERE q.SubjectId = :subjectId
-                  AND q.GradeLevel = :gradeLevel
-                  AND q.DifficultyLevel = :difficulty
-                ORDER BY RAND()
-                LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->prepare("SELECT q.*, s.SubjectName 
+                                    FROM Questions q
+                                    JOIN Subjects s ON q.SubjectId = s.SubjectId
+                                    WHERE q.SubjectId = :subjectId
+                                      AND q.GradeLevel = :gradeLevel
+                                      AND q.DifficultyLevel = :difficulty
+                                    ORDER BY RAND()
+                                    LIMIT :limit");
         $stmt->bindValue(':subjectId', (int)$subjectId, PDO::PARAM_INT);
         $stmt->bindValue(':gradeLevel', (int)$gradeLevel, PDO::PARAM_INT);
         $stmt->bindValue(':difficulty', $difficulty, PDO::PARAM_STR);
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
