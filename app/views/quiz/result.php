@@ -8,17 +8,18 @@
         'C' => $d['OptionC'] ?? '',
         'D' => $d['OptionD'] ?? ''
     ];
-    $userAnswer = $d['UserAnswer'] ?? '';
-    $correctAnswer = $d['CorrectAnswer'] ?? '';
+    $userAnswerContent = trim((string)($d['UserAnswerContent'] ?? ''));
+    $correctAnswerContent = trim((string)($d['CorrectAnswerContent'] ?? ''));
 ?>
     <div style="margin-bottom:20px;">
         <b>Câu <?= $index + 1 ?>:</b> <?= htmlspecialchars($d['Content'] ?? '') ?><br>
         <?php foreach ($options as $optKey => $optVal): 
+            $optValStr = trim((string)$optVal);
             $style = '';
-            if ($optKey === $userAnswer) {
-                $style = $userAnswer === $correctAnswer ? 'color:green;font-weight:bold;' : 'color:red;font-weight:bold;';
-            } elseif ($optKey === $correctAnswer) {
-                $style = $userAnswer !== $correctAnswer ? 'color:green;' : '';
+            if ($optValStr === $userAnswerContent) {
+                $style = $userAnswerContent === $correctAnswerContent ? 'color:green;font-weight:bold;' : 'color:red;font-weight:bold;';
+            } elseif ($optValStr === $correctAnswerContent) {
+                $style = $userAnswerContent !== $correctAnswerContent ? 'color:green;' : '';
             }
         ?>
             <span style="<?= $style ?>"><?= $optKey ?>. <?= htmlspecialchars($optVal) ?></span><br>

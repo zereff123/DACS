@@ -58,21 +58,30 @@ class QuizController {
 
     foreach ($questions as $q) {
         $qid = $q['QuestionId'];
-        $userAnswer = $answers[$qid] ?? '';
-        $isCorrect = ($userAnswer === $q['CorrectAnswer']);
+        $userAnswer = isset($answers[$qid]) ? trim($answers[$qid]) : '';
+        $correctAnswer = trim($q['CorrectAnswer']);
+
+        // Lấy nội dung đáp án
+        $options = [
+            'A' => $q['OptionA'],
+            'B' => $q['OptionB'],
+            'C' => $q['OptionC'],
+            'D' => $q['OptionD']
+        ];
+        $userAnswerContent = isset($options[$userAnswer]) ? trim($options[$userAnswer]) : '';
+        $correctAnswerContent = isset($options[$correctAnswer]) ? trim($options[$correctAnswer]) : '';
+
+        $isCorrect = ($userAnswer === $correctAnswer);
         if ($isCorrect) $correctCount++;
 
         $resultDetails[] = [
             'QuestionId' => $qid,
             'UserAnswer' => $userAnswer,
+            'UserAnswerContent' => $userAnswerContent,
             'IsCorrect' => $isCorrect,
-            'CorrectAnswer' => $q['CorrectAnswer'],
-            'Options' => [
-                'A' => $q['OptionA'],
-                'B' => $q['OptionB'],
-                'C' => $q['OptionC'],
-                'D' => $q['OptionD']
-            ]
+            'CorrectAnswer' => $correctAnswer,
+            'CorrectAnswerContent' => $correctAnswerContent,
+            'Options' => $options
         ];
     }
 
@@ -107,8 +116,26 @@ class QuizController {
         $quizResultId = $_GET['quizResultId'] ?? null;
         if (!$quizResultId) die("Thiếu QuizResultId");
 
+        $details = $this->quizModel->getQuizResultDetails($quizResultId);
+
+        // Bổ sung nội dung đáp án cho từng câu hỏi
+        foreach ($details as &$d) {
+            $options = [
+                'A' => $d['OptionA'],
+                'B' => $d['OptionB'],
+                'C' => $d['OptionC'],
+                'D' => $d['OptionD']
+            ];
+            $userAnswerKey = $d['UserAnswer'];
+            $correctAnswerKey = $d['CorrectAnswer'];
+            $d['UserAnswerContent'] = isset($options[$userAnswerKey]) ? $options[$userAnswerKey] : '';
+            $d['CorrectAnswerContent'] = isset($options[$correctAnswerKey]) ? $options[$correctAnswerKey] : '';
+            $d['Options'] = $options;
+        }
+        unset($d);
+
         $quizResult = $this->quizModel->getQuizResult($quizResultId);
-        $details = $_SESSION['last_result_details'] ?? [];
+        $_SESSION['last_score'] = $quizResult['Score'] ?? 0;
 
         require 'app/views/quiz/result.php';
     }
@@ -124,18 +151,23 @@ public function viewResult() {
     $quizResultId = $_GET['quizResultId'] ?? null;
     if (!$quizResultId) die("Thiếu QuizResultId");
 
-    $quizResult = $this->quizModel->getQuizResult($quizResultId);
     $details = $this->quizModel->getQuizResultDetailsByResultId($quizResultId);
 
-    // Chuẩn bị Options cho hiển thị
+    // Bổ sung nội dung đáp án cho từng câu hỏi
     foreach ($details as &$d) {
-        $d['Options'] = [
+        $options = [
             'A' => $d['OptionA'],
             'B' => $d['OptionB'],
             'C' => $d['OptionC'],
             'D' => $d['OptionD']
         ];
+        $userAnswerKey = $d['UserAnswer'];
+        $correctAnswerKey = $d['CorrectAnswer'];
+        $d['UserAnswerContent'] = isset($options[$userAnswerKey]) ? $options[$userAnswerKey] : '';
+        $d['CorrectAnswerContent'] = isset($options[$correctAnswerKey]) ? $options[$correctAnswerKey] : '';
+        $d['Options'] = $options;
     }
+    unset($d);
 
     require 'app/views/quiz/viewResult.php';
     }

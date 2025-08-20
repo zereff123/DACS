@@ -69,7 +69,7 @@ class Quiz {
 
     public function getQuizResultDetails($quizResultId) {
         $stmt = $this->db->prepare("
-            SELECT q.*, d.UserAnswer, d.IsCorrect 
+            SELECT q.*, d.UserAnswer, d.IsCorrect, q.CorrectAnswer
             FROM QuizResultDetails d
             JOIN Questions q ON d.QuestionId = q.QuestionId
             WHERE d.QuizResultId = ?
@@ -93,7 +93,7 @@ class Quiz {
     // Lấy chi tiết 1 lần làm bài
     public function getQuizResultDetailsByResultId($quizResultId) {
         $stmt = $this->db->prepare("
-            SELECT q.*, d.UserAnswer, d.IsCorrect 
+            SELECT q.*, d.UserAnswer, d.IsCorrect, q.CorrectAnswer
             FROM QuizResultDetails d
             JOIN Questions q ON d.QuestionId = q.QuestionId
             WHERE d.QuizResultId = ?
