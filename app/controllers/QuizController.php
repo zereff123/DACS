@@ -1,16 +1,17 @@
 <?php
 require_once __DIR__ . '/../models/Question.php';
 require_once __DIR__ . '/../models/Subject.php';
+require_once __DIR__ . '/../models/Quiz.php';
 
 class QuizController {
     private $db;
     private $questionModel;
     private $subjectModel;
+    private $quizModel;
 
     public function __construct() {
         SessionHelper::start();
 
-        // Kiểm tra user login
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?controller=account&action=login");
             exit;
@@ -21,23 +22,86 @@ class QuizController {
 
         $this->questionModel = new Question($this->db);
         $this->subjectModel = new Subject($this->db);
+        $this->quizModel = new Quiz($this->db);
+    }
+    
+    public function start() {
+    $user = $_SESSION['user'];
+    $subjectId = $_POST['subject_id'] ?? null;
+
+    if (!$subjectId) die("Vui lòng chọn môn học!");
+
+    $gradeLevel = $user['GradeLevel'] ?? 1;
+    $currentLevel = $user['CurrentLevel'] ?? 'TB';
+
+    // Lấy câu hỏi theo môn, lớp và trình độ
+    $questions = $this->questionModel->getRandomBySubjectGradePerformance($subjectId, $gradeLevel, $currentLevel, 40);
+
+    if (empty($questions)) {
+        die("Chưa có câu hỏi cho môn học này!");
     }
 
-    public function start() {
-        // Lấy thông tin user
-        $user = $_SESSION['user'];
-        $subjectId = $_POST['subject_id'] ?? null;
+    // Tạo Quiz tạm thời để lưu lịch sử
+    $quizId = $this->quizModel->createTempQuiz($subjectId, $gradeLevel, $user['UserId'], $questions);
 
-        if (!$subjectId) {
-            die("Vui lòng chọn môn học!");
+    require 'app/views/quiz/start.php';
+}
+
+    // Xử lý nộp bài
+    public function submit() {
+        $userId = $_SESSION['user']['UserId'];
+        $quizId = $_POST['quiz_id'] ?? null;
+        $answers = $_POST['answers'] ?? [];
+
+        if (!$quizId || empty($answers)) die("Thiếu dữ liệu nộp bài!");
+
+        $questions = $this->quizModel->getQuizQuestions($quizId);
+        $correctCount = 0;
+        $resultDetails = [];
+
+        foreach ($questions as $q) {
+            $qid = $q['QuestionId'];
+            $userAnswer = $answers[$qid] ?? '';
+            $isCorrect = ($userAnswer === $q['CorrectAnswer']);
+            if ($isCorrect) $correctCount++;
+
+            $resultDetails[] = [
+                'QuestionId' => $qid,
+                'UserAnswer' => $userAnswer,
+                'IsCorrect' => $isCorrect,
+                'CorrectAnswer' => $q['CorrectAnswer'],
+                'Options' => [
+                    'A' => $q['OptionA'],
+                    'B' => $q['OptionB'],
+                    'C' => $q['OptionC'],
+                    'D' => $q['OptionD']
+                ]
+            ];
         }
 
-        $gradeLevel = $user['GradeLevel'] ?? 1;      // Lớp của học sinh
-        $currentLevel = $user['CurrentLevel'] ?? 'TB'; // Trình độ: Yếu, TB, Giỏi
+        $score = round(($correctCount / count($questions)) * 100, 2);
 
-        // Lấy ngẫu nhiên 40 câu hỏi theo môn, lớp và trình độ
-        $questions = $this->questionModel->getRandomBySubjectGradePerformance($subjectId, $gradeLevel, $currentLevel, 40);
+        $quizResultId = $this->quizModel->saveQuizResult($quizId, $userId, $score);
 
-        require 'app/views/quiz/start.php';
+        foreach ($resultDetails as $detail) {
+            $this->quizModel->saveQuizResultDetail($quizResultId, $detail['QuestionId'], $detail['UserAnswer'], $detail['IsCorrect']);
+        }
+
+        $_SESSION['last_result_details'] = $resultDetails;
+        $_SESSION['last_score'] = $score;
+
+        header("Location: index.php?controller=quiz&action=result&quizResultId=$quizResultId");
+        exit();
+    }
+
+    // Trang hiển thị kết quả bài làm
+    public function result() {
+        $quizResultId = $_GET['quizResultId'] ?? null;
+        if (!$quizResultId) die("Thiếu QuizResultId");
+
+        $quizResult = $this->quizModel->getQuizResult($quizResultId);
+        $details = $_SESSION['last_result_details'] ?? [];
+
+        require 'app/views/quiz/result.php';
     }
 }
