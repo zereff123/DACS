@@ -87,6 +87,16 @@ class AccountController {
         header("Location: index.php");
         exit;
     }
+    public function index() {
+    $me = SessionHelper::get('user');
+    if ($me['Role'] !== 'admin') {
+        // Có thể chuyển hướng hoặc báo lỗi
+        die('Bạn không có quyền truy cập');
+    }
+    // Lấy danh sách user từ model
+    $users = UserModel::getAll(); // Viết hàm này trong UserModel
+    require 'app/views/admin/User.php';
+}
 
     public function profile() {
         AuthHelper::requireLogin();
@@ -127,4 +137,5 @@ class AccountController {
         include ROOT_PATH . "/app/views/account/profile.php";
         include ROOT_PATH . "/app/views/shares/footer.php";
     }
+
 }

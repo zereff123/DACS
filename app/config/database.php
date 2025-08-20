@@ -23,4 +23,12 @@ class Database {
         }
         return self::$instance;
     }
+    public static function getConnection() {
+        $host = 'localhost';
+        $dbname = 'AdaptiveQuizDB'; // sửa lại tên database
+        $username = 'root';           // sửa lại username
+        $password = '';           // sửa lại password
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        return new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password, $options);
+    }
 }
