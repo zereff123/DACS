@@ -45,54 +45,62 @@ class QuizController {
     $quizId = $this->quizModel->createTempQuiz($subjectId, $gradeLevel, $user['UserId'], $questions);
 
     require 'app/views/quiz/start.php';
+}public function submit() {
+    $userId = $_SESSION['user']['UserId'];
+    $quizId = $_POST['quiz_id'] ?? null;
+    $answers = $_POST['answers'] ?? [];
+
+    if (!$quizId || empty($answers)) die("Thiếu dữ liệu nộp bài!");
+
+    $questions = $this->quizModel->getQuizQuestions($quizId);
+    $correctCount = 0;
+    $resultDetails = [];
+
+    foreach ($questions as $q) {
+        $qid = $q['QuestionId'];
+        $userAnswer = $answers[$qid] ?? '';
+        $isCorrect = ($userAnswer === $q['CorrectAnswer']);
+        if ($isCorrect) $correctCount++;
+
+        $resultDetails[] = [
+            'QuestionId' => $qid,
+            'UserAnswer' => $userAnswer,
+            'IsCorrect' => $isCorrect,
+            'CorrectAnswer' => $q['CorrectAnswer'],
+            'Options' => [
+                'A' => $q['OptionA'],
+                'B' => $q['OptionB'],
+                'C' => $q['OptionC'],
+                'D' => $q['OptionD']
+            ]
+        ];
+    }
+
+    $score = round(($correctCount / count($questions)) * 100, 2);
+
+    // Lưu kết quả bài làm
+    $quizResultId = $this->quizModel->saveQuizResult($quizId, $userId, $score);
+
+    foreach ($resultDetails as $detail) {
+        $this->quizModel->saveQuizResultDetail($quizResultId, $detail['QuestionId'], $detail['UserAnswer'], $detail['IsCorrect']);
+    }
+
+    // Cập nhật LevelProgress và CurrentLevel
+    require_once __DIR__ . '/LevelController.php';
+    $levelController = new LevelController($this->db);
+    $levelInfo = $levelController->updateLevelProgress($userId, $score);
+
+    // Cập nhật session user
+    $_SESSION['user']['CurrentLevel'] = $levelInfo['CurrentLevel'];
+    $_SESSION['user']['LevelProgress'] = $levelInfo['LevelProgress'];
+
+    $_SESSION['last_result_details'] = $resultDetails;
+    $_SESSION['last_score'] = $score;
+
+    header("Location: index.php?controller=quiz&action=result&quizResultId=$quizResultId");
+    exit();
 }
 
-    // Xử lý nộp bài
-    public function submit() {
-        $userId = $_SESSION['user']['UserId'];
-        $quizId = $_POST['quiz_id'] ?? null;
-        $answers = $_POST['answers'] ?? [];
-
-        if (!$quizId || empty($answers)) die("Thiếu dữ liệu nộp bài!");
-
-        $questions = $this->quizModel->getQuizQuestions($quizId);
-        $correctCount = 0;
-        $resultDetails = [];
-
-        foreach ($questions as $q) {
-            $qid = $q['QuestionId'];
-            $userAnswer = $answers[$qid] ?? '';
-            $isCorrect = ($userAnswer === $q['CorrectAnswer']);
-            if ($isCorrect) $correctCount++;
-
-            $resultDetails[] = [
-                'QuestionId' => $qid,
-                'UserAnswer' => $userAnswer,
-                'IsCorrect' => $isCorrect,
-                'CorrectAnswer' => $q['CorrectAnswer'],
-                'Options' => [
-                    'A' => $q['OptionA'],
-                    'B' => $q['OptionB'],
-                    'C' => $q['OptionC'],
-                    'D' => $q['OptionD']
-                ]
-            ];
-        }
-
-        $score = round(($correctCount / count($questions)) * 100, 2);
-
-        $quizResultId = $this->quizModel->saveQuizResult($quizId, $userId, $score);
-
-        foreach ($resultDetails as $detail) {
-            $this->quizModel->saveQuizResultDetail($quizResultId, $detail['QuestionId'], $detail['UserAnswer'], $detail['IsCorrect']);
-        }
-
-        $_SESSION['last_result_details'] = $resultDetails;
-        $_SESSION['last_score'] = $score;
-
-        header("Location: index.php?controller=quiz&action=result&quizResultId=$quizResultId");
-        exit();
-    }
 
     // Trang hiển thị kết quả bài làm
     public function result() {
