@@ -1,6 +1,9 @@
 <h2>Đề thi môn <?= htmlspecialchars($questions[0]['SubjectName'] ?? '') ?></h2>
 
 <form method="POST" action="index.php?controller=quiz&action=submit">
+    <!-- Thêm input ẩn quiz_id -->
+    <input type="hidden" name="quiz_id" value="<?= $quizId ?? 0 ?>">
+
     <?php foreach ($questions as $index => $q): ?>
         <div style="margin-bottom:20px;">
             <b>Câu <?= $index + 1 ?>:</b> <?= htmlspecialchars($q['Content']) ?><br>
