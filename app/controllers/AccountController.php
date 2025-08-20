@@ -27,7 +27,7 @@ class AccountController {
                         'GradeLevel' => $user['GradeLevel'],
                         'CurrentLevel' => $user['CurrentLevel'],
                     ]);
-                    if (strtolower($user['Role']) === 'Admin') {
+                    if (strtolower(trim($user['Role'])) === 'admin') {
                         // Admin -> dashboard
                         header("Location: index.php?controller=Admin&action=dashboard");
                     } else {

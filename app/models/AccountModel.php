@@ -7,7 +7,9 @@ class AccountModel {
 
 public function findByUsernameOrEmail($usernameOrEmail) {
     try {
-        $query = "SELECT UserId, Username, Email, PasswordHash FROM Users WHERE Username = :username OR Email = :email";
+        $query = "SELECT UserId, Username, Email, PasswordHash, Role, GradeLevel, CurrentLevel 
+                  FROM Users 
+                  WHERE Username = :username OR Email = :email";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':username', $usernameOrEmail);
         $stmt->bindParam(':email', $usernameOrEmail);
@@ -17,10 +19,7 @@ public function findByUsernameOrEmail($usernameOrEmail) {
         error_log("Lỗi cơ sở dữ liệu: " . $e->getMessage());
         throw new RuntimeException("Lỗi hệ thống, vui lòng thử lại sau.");
     }
-}
-
-
-
+    }
 
     public function findById($id) {
         $stm = $this->db->prepare("SELECT * FROM Users WHERE UserId = :id");
