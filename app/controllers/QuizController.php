@@ -57,33 +57,35 @@ class QuizController {
     $resultDetails = [];
 
     foreach ($questions as $q) {
-        $qid = $q['QuestionId'];
-        $userAnswer = isset($answers[$qid]) ? trim($answers[$qid]) : '';
-        $correctAnswer = trim($q['CorrectAnswer']);
+    $qid = $q['QuestionId'];
+    $userAnswer = isset($answers[$qid]) ? trim($answers[$qid]) : '';
+    $correctAnswer = trim($q['CorrectAnswer']);
 
-        // Lấy nội dung đáp án
-        $options = [
-            'A' => $q['OptionA'],
-            'B' => $q['OptionB'],
-            'C' => $q['OptionC'],
-            'D' => $q['OptionD']
-        ];
-        $userAnswerContent = isset($options[$userAnswer]) ? trim($options[$userAnswer]) : '';
-        $correctAnswerContent = isset($options[$correctAnswer]) ? trim($options[$correctAnswer]) : '';
+    // Lấy nội dung đáp án
+    $options = [
+        'A' => $q['OptionA'],
+        'B' => $q['OptionB'],
+        'C' => $q['OptionC'],
+        'D' => $q['OptionD']
+    ];
+    $userAnswerContent = isset($options[$userAnswer]) ? trim($options[$userAnswer]) : '';
+    $correctAnswerContent = trim($correctAnswer);
 
-        $isCorrect = ($userAnswer === $correctAnswer);
-        if ($isCorrect) $correctCount++;
+    // So sánh nội dung thay vì key
+    $isCorrect = ($userAnswerContent === $correctAnswerContent);
+    if ($isCorrect) $correctCount++;
 
-        $resultDetails[] = [
-            'QuestionId' => $qid,
-            'UserAnswer' => $userAnswer,
-            'UserAnswerContent' => $userAnswerContent,
-            'IsCorrect' => $isCorrect,
-            'CorrectAnswer' => $correctAnswer,
-            'CorrectAnswerContent' => $correctAnswerContent,
-            'Options' => $options
-        ];
-    }
+    $resultDetails[] = [
+        'QuestionId' => $qid,
+        'UserAnswer' => $userAnswer,
+        'UserAnswerContent' => $userAnswerContent,
+        'IsCorrect' => $isCorrect,
+        'CorrectAnswer' => $correctAnswer,
+        'CorrectAnswerContent' => $correctAnswerContent,
+        'Options' => $options
+    ];
+}
+
 
     $score = round(($correctCount / count($questions)) * 100, 2);
 
