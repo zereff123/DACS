@@ -40,9 +40,10 @@
 <body>
     <h1>Trang quản trị hệ thống</h1>
     <div class="btn-container">
-        <a class="btn" href="/Question/index">📚 Quản lý câu hỏi</a>
-        <a class="btn" href="/Subject/index">📖 Quản lý môn học</a>
-        <a class="btn" href="/Account/index">👤 Quản lý tài khoản</a>
+        <a class="btn" href="index.php?controller=question&action=index">📚 Quản lý câu hỏi</a>
+        <a class="btn" href="index.php?controller=subject&action=index">📖 Quản lý môn học</a>
+        <a class="btn" href="index.php?controller=account&action=index">👤 Quản lý tài khoản</a>
+
     </div>
 </body>
 </html>

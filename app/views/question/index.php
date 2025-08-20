@@ -1,5 +1,5 @@
 <h2>Danh sách câu hỏi</h2>
-<a href="/Question/create">➕ Thêm câu hỏi</a>
+<a href="index.php?controller=question&action=create">➕ Thêm câu hỏi</a>
 <table border="1" cellpadding="5">
     <tr>
         <th>ID</th>
@@ -27,9 +27,12 @@
         <td><?= $q['GradeLevel'] ?></td>
         <td><?= $q['DifficultyLevel'] ?></td>
         <td>
-            <a href="/Question/edit?id=<?= $q['QuestionId'] ?>">Sửa</a> |
-            <a href="/Question/delete?id=<?= $q['QuestionId'] ?>" onclick="return confirm('Xóa câu hỏi này?')">Xóa</a>
+            <a href="index.php?controller=question&action=edit&id=<?= $q['QuestionId'] ?>">Sửa</a> |
+            <a href="index.php?controller=question&action=delete&id=<?= $q['QuestionId'] ?>" 
+                onclick="return confirm('Xóa câu hỏi này?')">Xóa</a>
+
         </td>
     </tr>
     <?php endforeach; ?>
 </table>
+<a class="btn" href="index.php?controller=admin&action=index">← Quay lại trang quản trị</a>

@@ -3,6 +3,7 @@ if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', __DIR__);
 }
 
+
 function callAction($controller, $action) {
     // Chuẩn hóa tên controller: admin → AdminController
     $controllerName = ucfirst(strtolower($controller)) . "Controller";

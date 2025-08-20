@@ -1,6 +1,6 @@
 <h2>Thêm câu hỏi mới</h2>
 
-<form method="post" action="/Question/store">
+<form method="post" action="index.php?controller=question&action=store">
     <label>Nội dung câu hỏi:</label><br>
     <textarea name="content" rows="4" cols="60" required></textarea><br><br>
 
@@ -52,4 +52,5 @@
 </form>
 
 <br>
-<a href="/Question/index">← Quay lại danh sách câu hỏi</a>
+<a href="index.php?controller=question&action=index">← Quay lại danh sách câu hỏi</a>
+
