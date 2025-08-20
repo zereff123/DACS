@@ -104,4 +104,31 @@ class QuizController {
 
         require 'app/views/quiz/result.php';
     }
+    public function history() {
+    $userId = $_SESSION['user']['UserId'];
+    $results = $this->quizModel->getUserQuizResults($userId);
+
+    require 'app/views/quiz/history.php';
+    }
+
+// Xem chi tiết 1 bài làm
+public function viewResult() {
+    $quizResultId = $_GET['quizResultId'] ?? null;
+    if (!$quizResultId) die("Thiếu QuizResultId");
+
+    $quizResult = $this->quizModel->getQuizResult($quizResultId);
+    $details = $this->quizModel->getQuizResultDetailsByResultId($quizResultId);
+
+    // Chuẩn bị Options cho hiển thị
+    foreach ($details as &$d) {
+        $d['Options'] = [
+            'A' => $d['OptionA'],
+            'B' => $d['OptionB'],
+            'C' => $d['OptionC'],
+            'D' => $d['OptionD']
+        ];
+    }
+
+    require 'app/views/quiz/viewResult.php';
+    }
 }

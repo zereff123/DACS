@@ -77,4 +77,28 @@ class Quiz {
         $stmt->execute([$quizResultId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getUserQuizResults($userId) {
+        $stmt = $this->db->prepare("
+            SELECT qr.QuizResultId, qr.Score, qr.StartTime, qr.EndTime, s.SubjectName
+            FROM QuizResults qr
+            JOIN Quizzes q ON qr.QuizId = q.QuizId
+            JOIN Subjects s ON q.SubjectId = s.SubjectId
+            WHERE qr.UserId = ?
+            ORDER BY qr.StartTime DESC
+        ");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Lấy chi tiết 1 lần làm bài
+    public function getQuizResultDetailsByResultId($quizResultId) {
+        $stmt = $this->db->prepare("
+            SELECT q.*, d.UserAnswer, d.IsCorrect 
+            FROM QuizResultDetails d
+            JOIN Questions q ON d.QuestionId = q.QuestionId
+            WHERE d.QuizResultId = ?
+        ");
+        $stmt->execute([$quizResultId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

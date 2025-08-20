@@ -15,28 +15,20 @@
 <?php $me = SessionHelper::get('user'); ?>
 <article>
   <header>
-    <strong><?php echo htmlspecialchars($me['Username']); ?></strong>
-    <small>Role: <?php echo htmlspecialchars($me['Role']); ?></small>
+    <strong><?= htmlspecialchars($me['Username']); ?></strong>
+    <small>Role: <?= htmlspecialchars($me['Role']); ?></small>
   </header>
 
   <form method="post">
     <label>Email
-      <input type="email" name="email" value="<?php echo htmlspecialchars($me['Email']); ?>" required>
+      <input type="email" name="email" value="<?= htmlspecialchars($me['Email']); ?>" required>
     </label>
     <div class="grid">
       <label>Lớp (GradeLevel)
-        <input type="number" name="gradeLevel" min="1" max="12" value="<?php echo (int)$me['GradeLevel']; ?>" required>
+        <input type="number" name="gradeLevel" min="1" max="12" value="<?= (int)$me['GradeLevel']; ?>" required>
       </label>
       <label>Trình độ hiện tại
-        <select name="currentLevel">
-          <?php
-            $levels = ['Yếu','TB','Giỏi'];
-            foreach ($levels as $lv) {
-              $sel = ($lv === $me['CurrentLevel']) ? 'selected' : '';
-              echo "<option value='$lv' $sel>$lv</option>";
-            }
-          ?>
-        </select>
+        <input type="text" value="<?= htmlspecialchars($me['CurrentLevel']); ?>" readonly>
       </label>
     </div>
     <label>Đổi mật khẩu (để trống nếu không đổi)
@@ -44,5 +36,7 @@
     </label>
     <button type="submit">Lưu thay đổi</button>
     <a class="secondary" href="index.php?controller=account&action=logout">Đăng xuất</a>
+    <!-- Nút xem lịch sử làm bài -->
+    <a class="secondary" href="index.php?controller=quiz&action=history">📄 Lịch sử làm bài</a>
   </form>
 </article>
